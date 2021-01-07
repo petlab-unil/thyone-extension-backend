@@ -1,5 +1,5 @@
 import * as socketio from 'socket.io';
-import {ChatMessage} from './types';
+import {ChatMessage, MsgType} from './types';
 
 export class SocketWrapper {
     private static connections: Set<SocketWrapper> = new Set<SocketWrapper>();
@@ -24,6 +24,18 @@ export class SocketWrapper {
     public initSockets = () => {
         this.socket.on('msg', (value: string) => {
             const newMsg: ChatMessage = {
+                msgType: MsgType.Msg,
+                content: value,
+                sender: this.userName,
+                timeStamp: new Date().getTime(),
+            };
+            this.sendMessage(newMsg);
+            this.pairedWith.sendMessage(newMsg);
+        });
+
+        this.socket.on('cell', (value: string) => {
+            const newMsg: ChatMessage = {
+                msgType: MsgType.Cell,
                 content: value,
                 sender: this.userName,
                 timeStamp: new Date().getTime(),
