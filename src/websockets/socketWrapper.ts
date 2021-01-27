@@ -64,6 +64,16 @@ export class SocketWrapper {
             this.sendMessageToAllSockets(newMsg);
         });
 
+        this.socket.on('flowChart', (value: string) => {
+            const newMsg: ChatMessage = {
+                msgType: MsgType.FlowChart,
+                content: value,
+                sender: this.userName,
+                timeStamp: new Date().getTime(),
+            };
+            this.sendMessageToAllSockets(newMsg);
+        });
+
         this.socket.on('cell', (value: string) => {
             try {
                 const sanitizeOptions = {
