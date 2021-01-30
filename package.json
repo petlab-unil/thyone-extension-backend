@@ -9,7 +9,7 @@
   "scripts": {
     "tslint": "tslint -p . -c tslint.json",
     "dev": "tsc -w & nodemon .",
-    "build": "tsc & node ."
+    "prod": "tsc & node ."
   },
   "dependencies": {
     "cors": "^2.8.5",
