@@ -8,12 +8,16 @@ import {createServer} from 'http';
 import * as socketio from 'socket.io';
 import {SocketWrapper} from './websockets/socketWrapper';
 import {JupyterHubService} from './jupyterHub/JupyterHubService';
+import {initUserRouter} from './routes/users';
 import * as dbConnect from './db/connect';
+import {UserGroup} from './db/schema';
 
-dbConnect.connect().then((handle) => {
-    SocketWrapper.setConnection(handle);
+dbConnect.connect().then(([discussions, users]) => {
+    SocketWrapper.setConnection(discussions);
+    const userRouter = initUserRouter(users);
     const app = express();
     app.use(cors);
+    app.use('/users', userRouter);
     const http = createServer(app);
 
     const io = new socketio.Server(http, {
@@ -31,6 +35,11 @@ dbConnect.connect().then((handle) => {
         const jupyterService = new JupyterHubService(hubtoken);
         try {
             const user = await jupyterService.user();
+            const dbUser = await users.findOne({userName: user.name});
+            if (dbUser === null || dbUser.group !== UserGroup.EXPERIMENTAL) {
+                socket.emit('Rejected');
+                return;
+            }
             const wrapper = new SocketWrapper(socket, user.name);
             wrapper.initSockets();
         } catch (e) {
