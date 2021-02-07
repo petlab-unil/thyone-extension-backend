@@ -37,13 +37,14 @@ dbConnect.connect().then(([discussions, users]) => {
             const user = await jupyterService.user();
             const dbUser = await users.findOne({userName: user.name});
             if (dbUser === null || dbUser.group !== UserGroup.EXPERIMENTAL) {
-                socket.emit('Rejected');
+                socket.emit('accepted', false);
                 return;
             }
             const wrapper = new SocketWrapper(socket, user.name);
             wrapper.initSockets();
+            socket.emit('accepted', true);
         } catch (e) {
-            socket.emit('Rejected');
+            socket.emit('accepted', false);
         }
     });
 
