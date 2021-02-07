@@ -16,7 +16,7 @@ dbConnect.connect().then(([discussions, users]) => {
     SocketWrapper.setConnection(discussions);
     const userRouter = initUserRouter(users);
     const app = express();
-    app.use(cors);
+    app.use(cors());
     app.use('/users', userRouter);
     const http = createServer(app);
 

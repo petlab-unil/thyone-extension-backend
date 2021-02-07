@@ -9,7 +9,7 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
 
     router.use(express.json());
 
-    router.post('create', async (req, res) => {
+    router.post('/create', async (req, res) => {
         const {body} = req;
         const {userName, firstName, lastName, email, group, key} = body;
         if (key === undefined || key !== process.env.USERS_CREATE_KEY) {
@@ -22,11 +22,11 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
             lastName === undefined ||
             email === undefined ||
             group === undefined;
-        const anyNotString = typeof userName === 'string' ||
-            typeof firstName === 'string' ||
-            typeof lastName === 'string' ||
-            typeof email === 'string' ||
-            typeof group === 'string';
+        const anyNotString = typeof userName !== 'string' ||
+            typeof firstName !== 'string' ||
+            typeof lastName !== 'string' ||
+            typeof email !== 'string' ||
+            typeof group !== 'string';
         if (anyUndefined || anyNotString) {
             res.status(400);
             res.send('Invalid body, you should provide: {userName: string; firstName: string; lastName: string; ' +
@@ -67,7 +67,7 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
         }
     });
 
-    router.put('log/:eventId', async (req, res) => {
+    router.put('/log/:eventId', async (req, res) => {
         const {eventId} = req.params;
         if (eventId === undefined || !EventTypes.has(eventId)) {
             res.status(400);
@@ -95,7 +95,7 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
             date: new Date(),
         };
         const push: {[key: string]: LogEvent} = {};
-        push[`interactions.$.${eventId}`] = logEvent;
+        push[`interactions.${eventId}`] = logEvent;
         await collection.findOneAndUpdate({userName: name}, {
             $push: push,
         });
