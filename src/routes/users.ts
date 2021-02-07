@@ -99,6 +99,8 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
         await collection.findOneAndUpdate({userName: name}, {
             $push: push,
         });
+        res.status(200);
+        res.send('Ok');
     });
 
     return router;
