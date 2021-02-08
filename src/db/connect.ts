@@ -1,10 +1,15 @@
 import {MongoClient, Collection} from 'mongodb';
-import {DiscussionSchema} from './schema';
+import {DiscussionSchema, UserSchema} from './schema';
 
-export const connect = async (): Promise<Collection<DiscussionSchema>> => {
+export const connect = async ():
+    Promise<[Collection<DiscussionSchema>, Collection<UserSchema>]> => {
     const uri = 'mongodb://localhost:27017/hec-chat';
     const client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true});
     await client.connect();
-    const db =  client.db('hec-chat');
-    return db.collection('discussions');
+    const db = client.db('hec-chat');
+    const users = db.collection('users');
+    const field = {userName: 1};
+    const options = {unique: true};
+    await users.createIndex(field, options);
+    return [db.collection('discussions'), users];
 };
