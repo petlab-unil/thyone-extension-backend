@@ -1,8 +1,5 @@
 FROM node:12.16.1
 
-ENV NODE_ENV=production
-WORKDIR /app
-
 COPY src .
 COPY package.json .
 COPY tsconfig.json .
