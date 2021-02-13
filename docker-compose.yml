@@ -10,6 +10,7 @@ services:
     environment:
       - MONGO_HOSTNAME=db
       - HUB_PATH=https://desi-jupyterhub.unil.ch/hub/api
+      - USERS_CREATE_KEY=AsusCorsairMac13
     ports:
       - 3000:3000
     networks:
