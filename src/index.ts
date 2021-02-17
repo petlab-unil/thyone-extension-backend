@@ -30,6 +30,7 @@ dbConnect.connect().then(([discussions, users]) => {
     // app.options('*', cors());
 
     io.on('connection', async (socket: socketio.Socket) => {
+        // @ts-ignore
         const hubtoken = socket.handshake.headers.hubtoken as string;
         const jupyterService = new JupyterHubService(hubtoken);
         try {
