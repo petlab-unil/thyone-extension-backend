@@ -113,8 +113,10 @@ export class SocketWrapper {
 
         let interval: NodeJS.Timeout;
         if (this.admin) {
+            let listed = false;
             this.socket.on('adminPair', () => {
-                this.listUser();
+                if (!listed) this.listUser();
+                listed = true;
             });
 
             interval = setInterval(() => {
