@@ -8,6 +8,7 @@ import {Discussion} from '../db/queries';
 export class SocketWrapper {
     // Each user can have multiple connections
     private static connectedUsers: Map<string, Set<SocketWrapper>> = new Map();
+    private static admins: Map<string, Set<SocketWrapper>> = new Map();
     private static pairs: Map<string, string | null> = new Map();
     private static unPaired: string[] = []; // Queue
     private static dbDiscussions: Collection<DiscussionSchema>;
@@ -20,10 +21,13 @@ export class SocketWrapper {
         return SocketWrapper.unPaired.shift() || null;
     }
 
-    constructor(private socket: socketio.Socket, private userName: string) {
+    constructor(private socket: socketio.Socket, private userName: string, private admin: boolean) {
         const prevConn = SocketWrapper.connectedUsers.get(userName);
         if (prevConn !== undefined) {
             prevConn.add(this);
+            if (admin) {
+                SocketWrapper.admins.get(userName)?.add(this);
+            }
             const pairedWith = SocketWrapper.pairs.get(userName);
             if (!!pairedWith) {
                 Discussion.getDiscussion(SocketWrapper.dbDiscussions, userName, pairedWith)
@@ -34,19 +38,27 @@ export class SocketWrapper {
             return;
         }
         const newConnSet = new Set([this]);
-        SocketWrapper.connectedUsers.set(userName, newConnSet);
+        SocketWrapper.connectedUsers.set(this.userName, newConnSet);
+        if (admin) {
+            SocketWrapper.admins.set(this.userName, newConnSet);
+            return;
+        }
+        this.listUser();
+    }
+
+    listUser = () => {
         const firstInQueue = SocketWrapper.shiftQueue();
         if (firstInQueue === null) {
-            SocketWrapper.pairs.set(userName, null);
-            SocketWrapper.unPaired.push(userName);
+            SocketWrapper.pairs.set(this.userName, null);
+            SocketWrapper.unPaired.push(this.userName);
         } else {
-            Discussion.createIfMissing(SocketWrapper.dbDiscussions, userName, firstInQueue)
+            Discussion.createIfMissing(SocketWrapper.dbDiscussions, this.userName, firstInQueue)
                 .then((discussion) => {
-                    SocketWrapper.pairs.set(userName, firstInQueue);
-                    SocketWrapper.pairs.set(firstInQueue, userName);
+                    SocketWrapper.pairs.set(this.userName, firstInQueue);
+                    SocketWrapper.pairs.set(firstInQueue, this.userName);
                     const otherSockets = SocketWrapper.connectedUsers.get(firstInQueue);
                     if (otherSockets === undefined || otherSockets === null) return;
-                    otherSockets.forEach(socket => socket.foundPair(userName, discussion));
+                    otherSockets.forEach(socket => socket.foundPair(this.userName, discussion));
                     this.foundPair(firstInQueue, discussion);
                 })
                 .catch(err => console.error(err));
@@ -99,8 +111,21 @@ export class SocketWrapper {
             }
         });
 
+        let interval: NodeJS.Timeout;
+        if (this.admin) {
+            let listed = false;
+            this.socket.on('adminPair', () => {
+                if (!listed) this.listUser();
+                listed = true;
+            });
+
+            interval = setInterval(() => {
+                this.socket.emit('adminQueue', {pairs: [...SocketWrapper.pairs], queue: SocketWrapper.unPaired});
+            }, 1000);
+        }
         this.socket.on('disconnect', () => {
             this.disconnect().then(() => {});
+            if (this.admin) clearInterval(interval);
         });
     }
 
@@ -171,6 +196,7 @@ export class SocketWrapper {
         }
         SocketWrapper.pairs.delete(this.userName);
         SocketWrapper.connectedUsers.delete(this.userName);
+        if (this.admin) SocketWrapper.admins.delete(this.userName);
     }
 
     private pairDisconnected = () => {
