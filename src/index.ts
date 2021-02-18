@@ -40,7 +40,7 @@ dbConnect.connect().then(([discussions, users]) => {
                 socket.emit('accepted', false);
                 return;
             }
-            const wrapper = new SocketWrapper(socket, user.name);
+            const wrapper = new SocketWrapper(socket, user.name, user.admin);
             wrapper.initSockets();
             socket.emit('accepted', true);
         } catch (e) {

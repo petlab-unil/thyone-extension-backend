@@ -10,3 +10,8 @@ export interface ChatMessage {
     sender: string;
     timeStamp: number;
 }
+
+export interface QueueStatus {
+    pairs: [string, string][];
+    queue: string[];
+}
