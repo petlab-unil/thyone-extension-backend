@@ -33,7 +33,7 @@ export class SocketWrapper {
                 Discussion.getDiscussion(SocketWrapper.dbDiscussions, userName, pairedWith)
                     .then((discussion) => {
                         this.foundPair(pairedWith, discussion);
-                    });
+                    }).catch(err => console.error(err));
             }
             return;
         }
@@ -124,7 +124,7 @@ export class SocketWrapper {
             }, 1000);
         }
         this.socket.on('disconnect', () => {
-            this.disconnect().then(() => {});
+            this.disconnect().then(() => {}).catch(err => console.error(err));
             if (this.admin) clearInterval(interval);
         });
     }

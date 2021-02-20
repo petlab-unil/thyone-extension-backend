@@ -52,4 +52,4 @@ dbConnect.connect().then(([discussions, users]) => {
         console.log('listening on *:3000');
     });
 
-});
+}).catch(err => console.error(err));
