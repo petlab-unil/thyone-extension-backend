@@ -24,6 +24,7 @@ dbConnect.connect().then(([discussions, users]) => {
         cors: {
             origin: '*',
             methods: ['GET', 'POST'],
+            allowedHeaders: ['hubtoken'],
         },
     });
 
