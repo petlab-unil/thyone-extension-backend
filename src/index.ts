@@ -44,6 +44,7 @@ dbConnect.connect().then(([discussions, users]) => {
             wrapper.initSockets();
             socket.emit('accepted', true);
         } catch (e) {
+            console.error('Error in login', e);
             socket.emit('accepted', false);
         }
     });
