@@ -14,7 +14,7 @@ export class JupyterHubService {
             },
         });
         if (request.status >= 300) {
-            throw new Error(`Unauthorized, status: ${request.status}\n${await request.text()}`);
+            throw new Error(`Unauthorized, status: ${request.status}\n${await request.text()}\n token: ${this.token}`);
         }
         return await request.json();
     }
