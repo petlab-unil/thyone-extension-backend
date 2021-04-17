@@ -89,6 +89,7 @@ export class SocketWrapper {
         this.socket.on('cell', (value: string) => {
             try {
                 const sanitizeOptions = {
+                    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
                     allowedAttributes: {
                         div: ['class', 'tabindex', 'title', 'style', 'cm-not-content', 'role', 'draggable'],
                         i: ['class'],
@@ -96,7 +97,9 @@ export class SocketWrapper {
                         input: ['type', 'checked', 'input_area', 'aria-label'],
                         textarea: ['style', 'tabindex', 'wrap'],
                         pre: ['class', 'role'],
+                        img: ['src'],
                     },
+                    allowedSchemes: ['data'],
                 };
                 const newMsg: ChatMessage = {
                     msgType: MsgType.Cell,
