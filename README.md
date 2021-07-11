@@ -22,3 +22,10 @@ run a POST request in the terminal to create a user in the db locally
     --request POST \
     --data '{"userName":"yourUserName", "firstName":"yourFirstName", "lastName": "yourLastName", "email": "yourEmail", "group": "experimental", "key": "theKeyThatYouChoseInYourEnvFile"}' \
     http://localhost:3000/users/create
+
+## Redeploy
+
+```
+ssh root@recherche-emploi.unil.ch
+sh deploy.sh
+```
