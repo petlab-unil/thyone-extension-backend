@@ -94,13 +94,41 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
             notebookName,
             date: new Date(),
         };
-        const push: {[key: string]: LogEvent} = {};
+        const push: { [key: string]: LogEvent } = {};
         push[`interactions.${eventId}`] = logEvent;
         await collection.findOneAndUpdate({userName: name}, {
             $push: push,
         });
         res.status(200);
         res.send('Ok');
+    });
+
+    router.put('/agreement/update/:userName', async (req, res) => {
+        const {userName} = req.params;
+        if (userName === undefined) {
+            res.status(400);
+            res.send('Invalid params, you should provide a userName');
+            return;
+        }
+
+        await collection.findOneAndUpdate(
+            {userName},
+            {$set: {agreement: true}},
+        );
+        res.status(200);
+        res.send('Ok');
+    });
+
+    router.get('/agreement/one/:userName', async (req, res) => {
+        const {userName} = req.params;
+        if (userName === undefined) {
+            res.status(400);
+            res.send('Invalid params, you should provide a userName');
+            return;
+        }
+        const found = await collection.findOne({userName}, {projection: {agreement: 1}});
+        res.status(200);
+        res.json(found);
     });
 
     return router;

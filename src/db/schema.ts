@@ -52,4 +52,5 @@ export interface UserSchema {
     email: string;
     group: UserGroup;
     interactions: InteractionEvents;
+    agreement?: boolean;
 }
