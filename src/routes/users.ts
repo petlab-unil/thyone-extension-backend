@@ -126,7 +126,7 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
             res.send('Invalid params, you should provide a userName');
             return;
         }
-        const found = await collection.findOne({userName}, {projection: {agreement: 1}});
+        const found = await collection.findOne({userName}, {projection: {agreement: 1, group: 1}});
         res.status(200);
         res.json(found);
     });
