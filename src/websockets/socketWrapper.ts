@@ -43,7 +43,7 @@ export class SocketWrapper {
             SocketWrapper.admins.set(this.userName, newConnSet);
             return;
         }
-        this.listUser();
+        SocketWrapper.unPaired.push(this.userName);
     }
 
     listUser = () => {
@@ -66,6 +66,14 @@ export class SocketWrapper {
     }
 
     public initSockets = () => {
+        this.socket.on('pairRandom', () => {
+            this.listUser();
+        });
+
+        this.socket.on('unpair', () => {
+            this.unpair();
+        });
+
         this.socket.on('msg', (value: string) => {
             const newMsg: ChatMessage = {
                 msgType: MsgType.Msg,
@@ -188,6 +196,9 @@ export class SocketWrapper {
             const otherSockets = SocketWrapper.connectedUsers.get(pairedWith);
             if (otherSockets === undefined || otherSockets === null) return;
             otherSockets.forEach(socket => socket.pairDisconnected());
+
+            SocketWrapper.unPaired.push(pairedWith);
+            /*
             // Reconnect other user to the one in queue if queue not empty, else add to queue
             const firstInQueue = SocketWrapper.shiftQueue();
             if (!firstInQueue) {
@@ -207,10 +218,28 @@ export class SocketWrapper {
                 }
 
             }
+             */
         }
         SocketWrapper.pairs.delete(this.userName);
         SocketWrapper.connectedUsers.delete(this.userName);
         if (this.admin) SocketWrapper.admins.delete(this.userName);
+    }
+
+    private unpair = () => {
+        const userSockets = SocketWrapper.connectedUsers.get(this.userName);
+        if (userSockets === undefined) {
+            return;
+        }
+        SocketWrapper.pairs.set(this.userName, null);
+        SocketWrapper.unPaired.push(this.userName);
+
+        const pairedWith = SocketWrapper.pairs.get(this.userName);
+        if (pairedWith === undefined || pairedWith === null) return;
+        SocketWrapper.pairs.set(pairedWith, null);
+        const otherSockets = SocketWrapper.connectedUsers.get(pairedWith);
+        if (otherSockets === undefined || otherSockets === null) return;
+        otherSockets.forEach(socket => socket.pairDisconnected());
+        SocketWrapper.unPaired.push(pairedWith);
     }
 
     private pairDisconnected = () => {
