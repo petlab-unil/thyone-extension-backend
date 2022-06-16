@@ -9,6 +9,13 @@ export namespace Discussion {
         return names;
     };
 
+    /**
+     * Retrieve an active discussion with users or create it if it is missing.
+     * @param db
+     * @param userName1: first user
+     * @param userName2: second user
+     * @returns
+     */
     export const createIfMissing =
         async (db: Collection<DiscussionSchema>, userName1: string, userName2: string):
             Promise<DiscussionSchema> => {
@@ -27,6 +34,12 @@ export namespace Discussion {
             return discussion;
         };
 
+    /**
+     * Retrieve the active discussion.
+     * @param db
+     * @param userNames
+     * @returns
+     */
     export const getDiscussion =
         async (db: Collection<DiscussionSchema>, userName1: string, userName2: string):
             Promise<DiscussionSchema> => {
@@ -40,6 +53,13 @@ export namespace Discussion {
             return discussion;
         };
 
+    /**
+     * Update the discussion with a new incoming message.
+     * @param db
+     * @param userName1: first user
+     * @param userName2: second user
+     * @param message
+     */
     export const addMessage = async (db: Collection<DiscussionSchema>,
                                      userName1: string,
                                      userName2: string,

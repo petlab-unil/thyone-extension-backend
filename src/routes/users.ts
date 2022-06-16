@@ -9,6 +9,9 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
 
     router.use(express.json());
 
+    /**
+     * Create a new user in the db.
+     */
     router.post('/create', async (req, res) => {
         const {body} = req;
         const {userName, firstName, lastName, email, group, key} = body;
@@ -67,6 +70,9 @@ export const initUserRouter = (collection: Collection<UserSchema>): express.Rout
         }
     });
 
+    /**
+     * Add the interaction interaction to a user in the db.
+     */
     router.put('/log/:eventId', async (req, res) => {
         const {eventId} = req.params;
         if (eventId === undefined || !EventTypes.has(eventId)) {

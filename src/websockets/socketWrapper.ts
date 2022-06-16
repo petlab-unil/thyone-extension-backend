@@ -5,6 +5,13 @@ import {Collection} from 'mongodb';
 import {DiscussionSchema} from '../db/schema';
 import {Discussion} from '../db/queries';
 
+/**
+ * @field connectedusers: map of user connections.
+ * Each user has a set of connections for different devices.
+ * @field pairs: map of user with its peer.
+ * @field unPaired: list of unpaired users
+ * @field randomQueue: list of random pairing queue
+ */
 export class SocketWrapper {
     // Each user can have multiple connections
     private static connectedUsers: Map<string, Set<SocketWrapper>> = new Map();
@@ -13,10 +20,16 @@ export class SocketWrapper {
     private static unPaired: string[] = []; // Queue
     private static dbDiscussions: Collection<DiscussionSchema>;
 
+    /**
+     * Update the SocketWrapper db fields.
+     */
     public static setConnection = (connection: Collection<DiscussionSchema>) => {
         SocketWrapper.dbDiscussions = connection;
     }
 
+    /**
+     * Remove the first usre from the unpaired ones.
+     */
     private static shiftQueue = (): string | null => {
         return SocketWrapper.unPaired.shift() || null;
     }
@@ -46,6 +59,10 @@ export class SocketWrapper {
         this.listUser();
     }
 
+    /**
+     * Connect to a person of the unpaired users list.
+     * If no one is available, add this user to the unpaired list.
+     */
     listUser = () => {
         const firstInQueue = SocketWrapper.shiftQueue();
         if (firstInQueue === null) {
@@ -66,6 +83,11 @@ export class SocketWrapper {
     }
 
     public initSockets = () => {
+        /**
+         * Socket response to the event 'msg'.
+         * Update in db the discussion with the received message of this user.
+         * Stream the message to all the other group users.
+         */
         this.socket.on('msg', (value: string) => {
             const newMsg: ChatMessage = {
                 msgType: MsgType.Msg,
@@ -76,6 +98,12 @@ export class SocketWrapper {
             this.sendMessageToAllSockets(newMsg);
         });
 
+        /**
+         * @deprecated Flowcharts are not used anymore.
+         * Socket response to the event 'flowchart'.
+         * Update in db the discussion with the received flowchart of this user.
+         * Stream the flowchart to all the other group users.
+         */
         this.socket.on('flowChart', (value: string) => {
             const newMsg: ChatMessage = {
                 msgType: MsgType.FlowChart,
@@ -86,6 +114,11 @@ export class SocketWrapper {
             this.sendMessageToAllSockets(newMsg);
         });
 
+        /**
+         * Socket response to the event 'cell'.
+         * Update in db the discussion with the received notebook cell of this user.
+         * Stream the cell to all the other group users.
+         */
         this.socket.on('cell', (value: string) => {
             try {
                 const sanitizeOptions = {
@@ -132,6 +165,12 @@ export class SocketWrapper {
         });
     }
 
+    /**
+     * Send a chat message to all users throught their web sockets.
+     * @param message
+     * @param discussionId
+     * @returns
+     */
     private sendMessageToAllSockets = (message: ChatMessage) => {
         const mySockets = SocketWrapper.connectedUsers.get(this.userName);
         if (mySockets === undefined || mySockets === null) return;
@@ -153,6 +192,9 @@ export class SocketWrapper {
         this.socket.emit('foundPair', {userName, discussion});
     }
 
+    /**
+     * Disconnect this user from the discussion and stream that info to the other user.
+     */
     private disconnect = async () => {
         const userSockets = SocketWrapper.connectedUsers.get(this.userName);
         if (userSockets === undefined) {
@@ -202,6 +244,10 @@ export class SocketWrapper {
         if (this.admin) SocketWrapper.admins.delete(this.userName);
     }
 
+    /**
+     * Stream to this user that a user has exited the discussion.
+     * @param userName
+     */
     private pairDisconnected = () => {
         this.socket.emit('pairDisconnected');
     }

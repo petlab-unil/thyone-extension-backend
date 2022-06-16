@@ -12,6 +12,9 @@ import {initUserRouter} from './routes/users';
 import * as dbConnect from './db/connect';
 import {UserGroup} from './db/schema';
 
+/**
+ * Initialize the Mongo db and the HTTP routes.
+ */
 dbConnect.connect().then(([discussions, users]) => {
     SocketWrapper.setConnection(discussions);
     const userRouter = initUserRouter(users);
@@ -30,6 +33,10 @@ dbConnect.connect().then(([discussions, users]) => {
 
     // app.options('*', cors());
 
+    /**
+     * When the websocket connection is handshaked, message the user of the current situation.
+     * Listen for websocket events on the port 3000.
+     */
     io.on('connection', async (socket: socketio.Socket) => {
         // @ts-ignore
         const hubtoken = socket.handshake.headers.hubtoken as string;
