@@ -114,16 +114,6 @@ export class SocketWrapper {
             }
         });
 
-        this.socket.on('activity', (value:string) => {
-            const newMsg: ChatMessage = {
-                msgType: MsgType.Activity,
-                content: value,
-                sender: this.userName,
-                timeStamp: new Date().getTime(),
-            };
-            this.sendMessageToAllSockets(newMsg);
-        });
-
         let interval: NodeJS.Timeout;
         if (this.admin) {
             let listed = false;
@@ -133,8 +123,7 @@ export class SocketWrapper {
             });
 
             interval = setInterval(() => {
-                this.socket.emit('adminQueue',
-                    {pairs: [...SocketWrapper.pairs], queue: SocketWrapper.unPaired});
+                this.socket.emit('adminQueue', {pairs: [...SocketWrapper.pairs], queue: SocketWrapper.unPaired});
             }, 1000);
         }
         this.socket.on('disconnect', () => {

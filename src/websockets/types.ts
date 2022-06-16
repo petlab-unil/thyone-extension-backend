@@ -2,7 +2,6 @@ export enum MsgType {
     Msg,
     Cell,
     FlowChart,
-    Activity,
 }
 
 export interface ChatMessage {
