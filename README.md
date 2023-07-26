@@ -6,7 +6,7 @@ Thyone is a collaborative extension for the classic Jupyter Notebook developed b
 
 In this repository, you will find the backend code for the Thyone extension. It handles the server-side functionality of socket.io, which is used for sending messages between Thyone users. Additionally, it implements the logging of user actions and messages in Thyone in a MongoDB database instance.
 
-Once the backend code is set up and running, proceed to setup the [Thyone Frontend Code](link here).
+Once the backend code is set up and running, proceed to setup the [Thyone Frontend Code](https://github.com/petlab-unil/thyone-extension-frontend).
 
 ## Prerequisites
 
